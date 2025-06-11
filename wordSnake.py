@@ -110,7 +110,7 @@ def start_game(config):
     screen.fill(config['BACKGROUND_COLOR'])
     
     word = choose_random_word()
-    first_letter = "G"
+    first_letter = word[0]
     letter_size = 50
     step = 1
     pause = False
