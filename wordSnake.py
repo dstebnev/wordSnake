@@ -68,7 +68,7 @@ class Feed():
 
 def choose_random_word():
     """Return a random word for the game."""
-    words = ["ATE", "PYTHON", "HELLO", "WORLD", "GAMES"]
+    words = ["GATE", "PYTHON", "HELLO", "WORLD", "GAMES"]
     return random.choice(words).upper()
 
 def init_feeds(word, config, head_coords=None):
