@@ -65,16 +65,37 @@ class Feed():
     def become_node(self):
         return SnakeNode(self.letter, self.x, self.y)
 
-def init_feeds(config):
-    letters = ['A', 'T', 'E']
+
+def choose_random_word():
+    """Return a random word for the game."""
+    words = ["ATE", "PYTHON", "HELLO", "WORLD", "GAMES"]
+    return random.choice(words).upper()
+
+def init_feeds(word, config):
+    letters = list(word)
     feeds = []
-    
+
     for l in letters:
         f = Feed(l)
-        f.update_coord(random.randint(2, config['WIDTH']/config['GRID_SIZE']-1), random.randint(2, config['HEIGHT']/config['GRID_SIZE']-1))
+        f.update_coord(
+            random.randint(2, config['WIDTH'] // config['GRID_SIZE'] - 1),
+            random.randint(2, config['HEIGHT'] // config['GRID_SIZE'] - 1)
+        )
         feeds.append(f)
-            
+
     return feeds
+
+
+def check_letter_collision(snake, feeds, word, index):
+    """Check if snake collides with the expected letter."""
+    for feed in feeds:
+        if feed.show and snake.body[0].x == feed.x and snake.body[0].y == feed.y:
+            if feed.letter == word[index]:
+                snake.body.append(feed.become_node())
+                feed.delete_feed()
+                return index + 1, True
+            return index, False
+    return index, True
 
 def show_feeds(screen, font, feeds, config):
     for feed in feeds:
@@ -82,29 +103,23 @@ def show_feeds(screen, font, feeds, config):
         if feed.show:
             screen.blit(text, (feed.x*config['GRID_SIZE'],feed.y*config['GRID_SIZE']))
                 
-def check_collisions(snake, feeds, cur_x, cur_y):
-    for feed in feeds:
-        
-        if cur_x == feed.x and cur_y == feed.y and feed.show:
-            feed.delete_feed()
-    
-    return snake
-
 def start_game(config):
     pygame.init()
     screen = pygame.display.set_mode((config['WIDTH'],config['HEIGHT']))
     pygame.display.set_caption("WordSnake")
     screen.fill(config['BACKGROUND_COLOR'])
     
+    word = choose_random_word()
     first_letter = "G"
     letter_size = 50
     step = 1
     pause = False
     head_x = 1
-    head_y = 1 
+    head_y = 1
     head = SnakeNode(first_letter, head_x, head_y)
     snake = Snake([head])
-    feeds = init_feeds(config)
+    feeds = init_feeds(word, config)
+    current_index = 0
 
     font = pygame.font.Font(None, letter_size)
     head_position = (head_x * config['GRID_SIZE'], head_y * config['GRID_SIZE'])
@@ -165,8 +180,21 @@ def start_game(config):
 
             
             show_feeds(screen, font, feeds, config)
-            snake.check_collision(feeds)
-            # snake = check_collisions(snake, feeds, head_x * config['GRID_SIZE'], head_y * config['GRID_SIZE'])
+
+            if current_index < len(word):
+                current_index, correct = check_letter_collision(
+                    snake, feeds, word, current_index
+                )
+                if not correct:
+                    print("Wrong letter collected! Game Over.")
+                    pygame.time.wait(1000)
+                    pygame.quit()
+                    return
+                if current_index == len(word):
+                    print("Word completed!")
+                    pygame.time.wait(1000)
+                    pygame.quit()
+                    return
                 
             pygame.display.flip()
             pygame.display.update()
