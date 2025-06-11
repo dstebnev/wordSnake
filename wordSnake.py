@@ -71,16 +71,24 @@ def choose_random_word():
     words = ["ATE", "PYTHON", "HELLO", "WORLD", "GAMES"]
     return random.choice(words).upper()
 
-def init_feeds(word, config):
-    letters = list(word)
+def init_feeds(word, config, head_coords=None):
+    """Initialise feeds ensuring unique positions and skipping the first letter."""
+    letters = list(word[1:])
     feeds = []
+    taken_positions = set()
+
+    if head_coords:
+        taken_positions.add(head_coords)
 
     for l in letters:
         f = Feed(l)
-        f.update_coord(
-            random.randint(2, config['WIDTH'] // config['GRID_SIZE'] - 1),
-            random.randint(2, config['HEIGHT'] // config['GRID_SIZE'] - 1)
-        )
+        while True:
+            x = random.randint(2, config['WIDTH'] // config['GRID_SIZE'] - 1)
+            y = random.randint(2, config['HEIGHT'] // config['GRID_SIZE'] - 1)
+            if (x, y) not in taken_positions:
+                taken_positions.add((x, y))
+                break
+        f.update_coord(x, y)
         feeds.append(f)
 
     return feeds
@@ -118,8 +126,8 @@ def start_game(config):
     head_y = 1
     head = SnakeNode(first_letter, head_x, head_y)
     snake = Snake([head])
-    feeds = init_feeds(word, config)
-    current_index = 0
+    feeds = init_feeds(word, config, (head_x, head_y))
+    current_index = 1
 
     font = pygame.font.Font(None, letter_size)
     head_position = (head_x * config['GRID_SIZE'], head_y * config['GRID_SIZE'])
