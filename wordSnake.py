@@ -173,5 +173,6 @@ def start_game(config):
             
         clock.tick(FPS)
 
+if __name__ == "__main__":
+    start_game(config)
 
-start_game(config)
